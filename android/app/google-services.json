@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "783248116496",
+    "project_id": "funcionalidade-db565",
+    "storage_bucket": "funcionalidade-db565.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783248116496:android:fe31cb9d4e711616f33395",
+        "android_client_info": {
+          "package_name": "com.henriquem.ribeiro.funcionalidade_tcc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "783248116496-t7dkkecfiao5ktosda7r369aid6me2ho.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqomrOauqfx2qmz3d-QYbZtpErXCY1SFQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "783248116496-t7dkkecfiao5ktosda7r369aid6me2ho.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783248116496:android:818ab7750b37062ff33395",
+        "android_client_info": {
+          "package_name": "henriquerib.com.funcionalidade"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "783248116496-t7dkkecfiao5ktosda7r369aid6me2ho.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqomrOauqfx2qmz3d-QYbZtpErXCY1SFQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "783248116496-t7dkkecfiao5ktosda7r369aid6me2ho.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
