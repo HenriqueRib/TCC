@@ -13,8 +13,8 @@ class Cadastro extends StatefulWidget {
 class _CadastroState extends State<Cadastro> {
 
   //Controladores
-  TextEditingController _controllerNome = TextEditingController(text: "Henrique Ribeiro");
-  TextEditingController _controllerEmail = TextEditingController(text: "henriquem@gmail.com.br");
+  TextEditingController _controllerNome = TextEditingController(text: "Jamilton Damasceno");
+  TextEditingController _controllerEmail = TextEditingController(text: "jamilton@gmail.com");
   TextEditingController _controllerSenha = TextEditingController(text: "1234567");
   String _mensagemErro = "";
 
@@ -79,11 +79,8 @@ class _CadastroState extends State<Cadastro> {
       .document( firebaseUser.uid )
       .setData( usuario.toMap() );
 
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => Home()
-          )
+      Navigator.pushNamedAndRemoveUntil(
+          context, "/home", (_)=>false
       );
 
     }).catchError((error){
@@ -93,6 +90,9 @@ class _CadastroState extends State<Cadastro> {
       });
 
     });
+
+
+
 
   }
 

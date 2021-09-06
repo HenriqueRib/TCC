@@ -32,6 +32,7 @@ dependencies:
   firebase_auth: ^0.11.1+7
   firebase_storage: ^3.0.2
   cloud_firestore: ^0.12.5+2
+  image_picker: ^0.6.0+10 #selecionar imagens
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +51,7 @@ flutter:
   assets:
      - imagens/logo.png
      - imagens/usuario.png
+     - imagens/bg.png
   # To add assets to your application, add an assets section, like this:
 
 

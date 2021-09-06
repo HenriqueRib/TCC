@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Cadastro.dart';
 import 'Home.dart';
+import 'RouteGenerator.dart';
 import 'model/Usuario.dart';
 
 class Login extends StatefulWidget {
@@ -59,12 +60,7 @@ class _LoginState extends State<Login> {
         password: usuario.senha
     ).then((firebaseUser){
 
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => Home()
-          )
-      );
+      Navigator.pushReplacementNamed(context, "/home");
 
     }).catchError((error){
 
@@ -84,12 +80,7 @@ class _LoginState extends State<Login> {
     FirebaseUser usuarioLogado = await auth.currentUser();
 
     if( usuarioLogado != null ){
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => Home()
-          )
-      );
+      Navigator.pushReplacementNamed(context, "/home");
     }
 
   }
