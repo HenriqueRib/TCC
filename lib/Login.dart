@@ -12,8 +12,8 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
 
-  TextEditingController _controllerEmail = TextEditingController(text: "jamilton@gmail.com");
-  TextEditingController _controllerSenha = TextEditingController(text: "1234567");
+  TextEditingController _controllerEmail = TextEditingController(text: "");
+  TextEditingController _controllerSenha = TextEditingController(text: "");
   String _mensagemErro = "";
 
   _validarCampos(){
@@ -95,7 +95,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(color: Color(0xff075E54)),
+        decoration: BoxDecoration(color: Color(0xff2A5E8e)),
         padding: EdgeInsets.all(16),
         child: Center(
           child: SingleChildScrollView(
@@ -146,7 +146,7 @@ class _LoginState extends State<Login> {
                         "Entrar",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
-                      color: Colors.green,
+                      color: Color(0xff91998A),
                       padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32)

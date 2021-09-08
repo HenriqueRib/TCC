@@ -11,8 +11,8 @@ final ThemeData temaIOS = ThemeData(
 );
 
 final ThemeData temaPadrao = ThemeData(
-  primaryColor: Color(0xff075E54),
-  accentColor: Color(0xff25D366),
+  primaryColor: Color(0xff2A5E8e),
+  accentColor: Color(0xff91998A),
 );
 
 void main(){

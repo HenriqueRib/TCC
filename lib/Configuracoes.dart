@@ -206,7 +206,7 @@ class _ConfiguracoesState extends State<Configuracoes> {
                         "Salvar",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
-                      color: Colors.green,
+                      color: Color(0xff91998A),
                       padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32)),

@@ -13,9 +13,9 @@ class Cadastro extends StatefulWidget {
 class _CadastroState extends State<Cadastro> {
 
   //Controladores
-  TextEditingController _controllerNome = TextEditingController(text: "Jamilton Damasceno");
-  TextEditingController _controllerEmail = TextEditingController(text: "jamilton@gmail.com");
-  TextEditingController _controllerSenha = TextEditingController(text: "1234567");
+  TextEditingController _controllerNome = TextEditingController(text: "");
+  TextEditingController _controllerEmail = TextEditingController(text: "");
+  TextEditingController _controllerSenha = TextEditingController(text: "");
   String _mensagemErro = "";
 
   _validarCampos(){
@@ -103,7 +103,7 @@ class _CadastroState extends State<Cadastro> {
         title: Text("Cadastro"),
       ),
       body: Container(
-        decoration: BoxDecoration(color: Color(0xff075E54)),
+        decoration: BoxDecoration(color: Color(0xff2A5E8e)),
         padding: EdgeInsets.all(16),
         child: Center(
           child: SingleChildScrollView(
@@ -169,7 +169,7 @@ class _CadastroState extends State<Cadastro> {
                         "Cadastrar",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
-                      color: Colors.green,
+                      color: Color(0xff91998A),
                       padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32)),
