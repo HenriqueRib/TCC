@@ -33,6 +33,7 @@ dependencies:
   firebase_storage: ^3.0.2
   cloud_firestore: ^0.12.5+2
   image_picker: ^0.6.0+10 #selecionar imagens
+  flutter_audio_recorder2: ^0.0.2
 
 dev_dependencies:
   flutter_test:

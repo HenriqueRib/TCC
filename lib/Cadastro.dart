@@ -118,11 +118,20 @@ class _CadastroState extends State<Cadastro> {
                     height: 150,
                   ),
                 ),
+                Center(
+                  child: Text(
+                    _mensagemErro,
+                    style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 20
+                    ),
+                  ),
+                ),
                 Padding(
-                  padding: EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.only(top:20 ,bottom: 8),
                   child: TextField(
                     controller: _controllerNome,
-                    autofocus: true,
+                    autofocus: false,
                     keyboardType: TextInputType.text,
                     style: TextStyle(fontSize: 20),
                     decoration: InputDecoration(
@@ -178,15 +187,6 @@ class _CadastroState extends State<Cadastro> {
                       }
                       ),
                 ),
-                Center(
-                  child: Text(
-                    _mensagemErro,
-                    style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 20
-                    ),
-                  ),
-                )
               ],
             ),
           ),

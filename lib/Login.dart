@@ -103,7 +103,7 @@ class _LoginState extends State<Login> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.only(bottom: 32),
+                  padding: EdgeInsets.only(bottom: 5),
                   child: Image.asset(
                     "imagens/logo.png",
                     width: 200,
@@ -111,10 +111,22 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 Padding(
+                  padding: EdgeInsets.only(top: 12, bottom: 20),
+                  child: Center(
+                    child: Text(
+                      _mensagemErro,
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 20
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
                   padding: EdgeInsets.only(bottom: 8),
                   child: TextField(
                     controller: _controllerEmail,
-                    autofocus: true,
+                    autofocus: false,
                     keyboardType: TextInputType.emailAddress,
                     style: TextStyle(fontSize: 20),
                     decoration: InputDecoration(
@@ -173,18 +185,6 @@ class _LoginState extends State<Login> {
                     },
                   ),
                 ),
-                Padding(
-                    padding: EdgeInsets.only(top: 16),
-                  child: Center(
-                    child: Text(
-                      _mensagemErro,
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 20
-                      ),
-                    ),
-                  ),
-                )
               ],
             ),
           ),
