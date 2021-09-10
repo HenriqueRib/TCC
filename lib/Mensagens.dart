@@ -10,7 +10,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
+import 'package:record/record.dart';
+//import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
 
 class Mensagens extends StatefulWidget {
   Usuario contato;
@@ -95,8 +96,8 @@ class _MensagensState extends State<Mensagens> {
   }
 
   _enviarAudio() async {
-    bool hasPermission = await FlutterAudioRecorder2.hasPermissions;
-    // https://github.com/hanyska/flutter_audio_recorder2
+
+
   }
 
   _enviarFoto() async {
