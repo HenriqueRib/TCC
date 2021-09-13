@@ -1,21 +1,22 @@
 import 'dart:async';
-import 'dart:developer';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:audioplayers/audio_cache.dart';
+import 'package:audioplayers/audioplayers.dart';
+
 import 'model/Conversa.dart';
 import 'model/Mensagem.dart';
 import 'model/Usuario.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:record/record.dart';
-//import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_sound_lite/public/flutter_sound_recorder.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class Mensagens extends StatefulWidget {
-  Usuario contato;
 
+  Usuario contato;
   Mensagens(this.contato);
 
   @override
@@ -95,9 +96,106 @@ class _MensagensState extends State<Mensagens> {
 
   }
 
+  @override
+  void dispose() {
+    if (myRecorder != null) {
+      myRecorder.closeAudioSession();
+      myPlayer = null;
+    }
+    super.dispose();
+  }
+
+  _executar() async {
+
+    if( primeiraExecucao ){
+      audioPlayer = await audioCache.play("musica.mp3");
+      primeiraExecucao = false;
+    }else{
+      audioPlayer.resume();
+    }
+
+
+  }
+  _pausar() async {
+
+    int resultado = await audioPlayer.pause();
+    if( resultado == 1 ){
+      //sucesso
+    }
+
+  }
+
+  _parar() async {
+
+    int resultado = await audioPlayer.stop();
+    if( resultado == 1 ){
+      //sucesso
+    }
+
+  }
+  FlutterSoundRecorder myPlayer = FlutterSoundRecorder(); // Instanciando
+  FlutterSoundRecorder myRecorder = FlutterSoundRecorder(); // Minha Gravação
+  AudioCache audioCache = AudioCache(prefix: "audios/");
+  AudioPlayer audioPlayer = AudioPlayer();
+  bool primeiraExecucao = true;
+
+  // ainda não envia
   _enviarAudio() async {
 
+//    audioPlayer = await audioCache.play("musica.mp3");
 
+    showDialog (
+        context: context,
+        builder:(context){
+          return
+            Padding(
+              padding: EdgeInsets.fromLTRB(0,400,0,0),
+              child: AlertDialog(
+                title: Text("Grave e envie seu audio!"),
+                content: Column(
+                  children: <Widget>[
+                    //Slider
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+
+                        Padding(
+                          padding: EdgeInsets.all(8),
+                          child: GestureDetector(
+                            child: Image.asset("assets/imagens/executar.png"),
+                            onTap: (){
+                              _executar();
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8),
+                          child: GestureDetector(
+                            child: Image.asset("assets/imagens/pausar.png"),
+                            onTap: (){
+                              _pausar();
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8),
+                          child: GestureDetector(
+                            child: Image.asset("assets/imagens/parar.png"),
+                            onTap: (){
+                              _parar();
+                            },
+                          ),
+                        )
+
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            );
+
+        }
+    );
   }
 
   _enviarFoto() async {

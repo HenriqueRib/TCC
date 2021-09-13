@@ -33,7 +33,13 @@ dependencies:
   firebase_storage: ^3.0.2
   cloud_firestore: ^0.12.5+2
   image_picker: ^0.6.0+10 #selecionar imagens
-  flutter_audio_recorder2: ^0.0.2
+  path_provider: ^1.6.27
+  permission_handler: ^5.0.1
+  path: ^1.6.4
+  #flutter_ffmpeg: ^0.3.1
+  intl: ^0.16.1
+  flutter_sound_lite: ^7.6.4+2
+  audioplayers: ^0.12.0
 
 dev_dependencies:
   flutter_test:
@@ -53,6 +59,11 @@ flutter:
      - imagens/logo.png
      - imagens/usuario.png
      - imagens/bg.png
+     - assets/imagens/executar.png
+     - assets/imagens/parar.png
+     - assets/imagens/pausar.png
+     - assets/audios/bach.mp3
+     - assets/audios/musica.mp3
   # To add assets to your application, add an assets section, like this:
 
 
