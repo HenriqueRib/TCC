@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'model/Conversa.dart';
 import 'model/Mensagem.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sound_lite/public/flutter_sound_recorder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:audio_recorder/audio_recorder.dart';
 
 class Mensagens extends StatefulWidget {
 
@@ -31,6 +33,8 @@ class _MensagensState extends State<Mensagens> {
   String _idUsuarioDestinatario;
   Firestore db = Firestore.instance;
   TextEditingController _controllerMensagem = TextEditingController();
+  FocusNode focus = new FocusNode();
+
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
   ScrollController _scrollController = ScrollController();
@@ -114,6 +118,32 @@ class _MensagensState extends State<Mensagens> {
       audioPlayer.resume();
     }
 
+//    _startRecord() async {
+//      try {
+//        _recording = true;
+//        setState(() {});
+//        final directory = await getApplicationDocumentsDirectory();
+//        var filename =
+//            'aud_' + DateTime.now().millisecondsSinceEpoch.toString() + '';
+//        String path = directory.path + '/' + filename;
+//
+//        // Check permissions before starting
+//        bool hasPermissions = await AudioRecorder.hasPermissions;
+//        // Get the state of the recorder
+//        bool isRecording = await AudioRecorder.isRecording;
+//
+//        // Start recording
+//        print(directory.path);
+//        await AudioRecorder.start(
+//            path: path, audioOutputFormat: AudioOutputFormat.AAC);
+//        print("GRAVANDO");
+//      } catch (e) {
+//        print(e.message);
+//        _recording = false;
+//        setState(() {});
+//      }
+//    }
+
 
   }
   _pausar() async {
@@ -138,6 +168,7 @@ class _MensagensState extends State<Mensagens> {
   AudioCache audioCache = AudioCache(prefix: "audios/");
   AudioPlayer audioPlayer = AudioPlayer();
   bool primeiraExecucao = true;
+  bool _recording = false;
 
   // ainda não envia
   _enviarAudio() async {
@@ -301,7 +332,7 @@ class _MensagensState extends State<Mensagens> {
               padding: EdgeInsets.only(right: 8),
               child: TextField(
                 controller: _controllerMensagem,
-                autofocus: true,
+                focusNode: focus,
                 keyboardType: TextInputType.text,
                 style: TextStyle(fontSize: 20),
                 decoration: InputDecoration(
@@ -365,45 +396,51 @@ class _MensagensState extends State<Mensagens> {
               return Text("Erro ao carregar os dados!");
             } else {
               return Expanded(
-                child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: querySnapshot.documents.length,
-                    itemBuilder: (context, indice) {
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: (){
+                    focus.unfocus();
+                  },
+                  child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: querySnapshot.documents.length,
+                      itemBuilder: (context, indice) {
 
-                      //recupera mensagem
-                      List<DocumentSnapshot> mensagens = querySnapshot.documents.toList();
-                      DocumentSnapshot item = mensagens[indice];
+                        //recupera mensagem
+                        List<DocumentSnapshot> mensagens = querySnapshot.documents.toList();
+                        DocumentSnapshot item = mensagens[indice];
 
-                      double larguraContainer =
-                          MediaQuery.of(context).size.width * 0.8;
+                        double larguraContainer =
+                            MediaQuery.of(context).size.width * 0.8;
 
-                      //Define cores e alinhamentos
-                      Alignment alinhamento = Alignment.centerRight;
-                      Color cor = Color(0xffd2ffa5);
-                      if ( _idUsuarioLogado != item["idUsuario"] ) {
-                        alinhamento = Alignment.centerLeft;
-                        cor = Colors.white;
-                      }
+                        //Define cores e alinhamentos
+                        Alignment alinhamento = Alignment.centerRight;
+                        Color cor = Color(0xffd2ffa5);
+                        if ( _idUsuarioLogado != item["idUsuario"] ) {
+                          alinhamento = Alignment.centerLeft;
+                          cor = Colors.white;
+                        }
 
-                      return Align(
-                        alignment: alinhamento,
-                        child: Padding(
-                          padding: EdgeInsets.all(6),
-                          child: Container(
-                            width: larguraContainer,
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                                color: cor,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(8))),
-                            child:
-                            item["tipo"] == "texto"
-                                ? Text(item["mensagem"],style: TextStyle(fontSize: 18),)
-                                : Image.network(item["urlImagem"]),
+                        return Align(
+                          alignment: alinhamento,
+                          child: Padding(
+                            padding: EdgeInsets.all(6),
+                            child: Container(
+                              width: larguraContainer,
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                  color: cor,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8))),
+                              child:
+                              item["tipo"] == "texto"
+                                  ? Text(item["mensagem"],style: TextStyle(fontSize: 18),)
+                                  : Image.network(item["urlImagem"]),
+                            ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
+                ),
               );
             }
 
