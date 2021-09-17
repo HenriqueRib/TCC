@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
-
 import 'model/Conversa.dart';
 import 'model/Mensagem.dart';
 import 'model/Usuario.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_sound_lite/public/flutter_sound_recorder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:audio_recorder/audio_recorder.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class Mensagens extends StatefulWidget {
 
@@ -111,47 +111,72 @@ class _MensagensState extends State<Mensagens> {
 
   _executar() async {
 
-    if( primeiraExecucao ){
-      audioPlayer = await audioCache.play("musica.mp3");
-      primeiraExecucao = false;
-    }else{
-      audioPlayer.resume();
+//    if( primeiraExecucao ){
+//      audioPlayer = await audioCache.play("musica.mp3");
+//      primeiraExecucao = false;
+//    }else{
+//      audioPlayer.resume();
+//    }
+    await Permission.microphone.request().isGranted;
+//    print(await Permission.microphone.request().isGranted);
+    if (await AudioRecorder.hasPermissions) {
+      print("GRAVANDO Algo de errado não esta certo");
     }
 
+
 //    _startRecord() async {
-//      try {
-//        _recording = true;
-//        setState(() {});
-//        final directory = await getApplicationDocumentsDirectory();
-//        var filename =
-//            'aud_' + DateTime.now().millisecondsSinceEpoch.toString() + '';
-//        String path = directory.path + '/' + filename;
-//
-//        // Check permissions before starting
-//        bool hasPermissions = await AudioRecorder.hasPermissions;
-//        // Get the state of the recorder
-//        bool isRecording = await AudioRecorder.isRecording;
-//
-//        // Start recording
-//        print(directory.path);
-//        await AudioRecorder.start(
-//            path: path, audioOutputFormat: AudioOutputFormat.AAC);
-//        print("GRAVANDO");
-//      } catch (e) {
-//        print(e.message);
-//        _recording = false;
-//        setState(() {});
-//      }
+    try {
+      _recording = true;
+      setState(() {});
+      final directory = await getApplicationDocumentsDirectory();
+      var filename =
+          'aud_' + DateTime.now().millisecondsSinceEpoch.toString() + '';
+      String path = directory.path + '/' + filename;
+
+      // Check permissions before starting
+      bool hasPermissions = await AudioRecorder.hasPermissions;
+
+      // Get the state of the recorder
+      bool isRecording = await AudioRecorder.isRecording;
+      print("GRAVANDODentro");
+      // Start recording
+      print(directory.path);
+
+      await AudioRecorder.start(
+          path: path, audioOutputFormat: AudioOutputFormat.AAC);
+      print("GRAVANDO");
+
+    } catch (e) {
+      print("GRAVANDO Erro");
+      print(e.message);
+      _recording = false;
+      setState(() {});
+    }
 //    }
 
 
   }
   _pausar() async {
+//    int resultado = await audioPlayer.pause();
+//    if( resultado == 1 ){
+//      //sucesso
+//    }
 
-    int resultado = await audioPlayer.pause();
-    if( resultado == 1 ){
-      //sucesso
+//    _stopRecord() async {
+    try {
+      _recording = false;
+      setState(() {});
+      // Stop recording
+      Recording recording = await AudioRecorder.stop();
+      print(
+          "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
+      var audio = File(recording.path);
+//        uploadFile('audio', audio);
+      setState(() {});
+    } catch (err) {
+      print('stopRecorder error: $err');
     }
+//    }
 
   }
 
