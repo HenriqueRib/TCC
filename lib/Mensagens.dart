@@ -34,6 +34,7 @@ class _MensagensState extends State<Mensagens> {
   Firestore db = Firestore.instance;
   TextEditingController _controllerMensagem = TextEditingController();
   FocusNode focus = new FocusNode();
+  String caminha = "";
 
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
@@ -172,7 +173,9 @@ class _MensagensState extends State<Mensagens> {
           "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
       var audio = File(recording.path);
 //        uploadFile('audio', audio);
-      setState(() {});
+      setState(() {
+        caminha = recording.path;
+      });
     } catch (err) {
       print('stopRecorder error: $err');
     }
@@ -182,9 +185,17 @@ class _MensagensState extends State<Mensagens> {
 
   _parar() async {
 
-    int resultado = await audioPlayer.stop();
-    if( resultado == 1 ){
-      //sucesso
+//    int resultado = await audioPlayer.stop();
+//    if( resultado == 1 ){
+//      //sucesso
+//    }
+        if( primeiraExecucao ){
+
+          audioPlayer =  (await audioPlayer.play(caminha, isLocal: true)) as AudioPlayer;
+//      audioPlayer = (await audioPlayer.play(caminha)) as AudioPlayer;
+      primeiraExecucao = false;
+    }else{
+      audioPlayer.resume();
     }
 
   }
