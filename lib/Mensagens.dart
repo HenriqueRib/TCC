@@ -27,18 +27,38 @@ class Mensagens extends StatefulWidget {
 
 class _MensagensState extends State<Mensagens> {
 
-  File _imagem;
   bool _subindoImagem = false;
   String _idUsuarioLogado;
   String _idUsuarioDestinatario;
   Firestore db = Firestore.instance;
   TextEditingController _controllerMensagem = TextEditingController();
+//Após implementação de gravar
   FocusNode focus = new FocusNode();
-  String caminha = "";
-
+  String caminho = "";
+  FlutterSoundRecorder myPlayer = FlutterSoundRecorder(); // Instanciando
+  FlutterSoundRecorder myRecorder = FlutterSoundRecorder(); // Minha Gravação
+  AudioCache audioCache = AudioCache(prefix: "audios/");
+  AudioPlayer audioPlayer = AudioPlayer();
+  bool primeiraExecucao = true;
+  bool _recording = false;
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
   ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    if (myRecorder != null) {
+      myRecorder.closeAudioSession();
+      myPlayer = null;
+    }
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _recuperarDadosUsuario();
+  }
 
   _enviarMensagem() {
 
@@ -59,7 +79,6 @@ class _MensagensState extends State<Mensagens> {
 
       //Salvar conversa
       _salvarConversa( mensagem );
-
 
     }
   }
@@ -88,8 +107,7 @@ class _MensagensState extends State<Mensagens> {
 
   }
 
-  _salvarMensagem(
-      String idRemetente, String idDestinatario, Mensagem msg) async {
+  _salvarMensagem(String idRemetente, String idDestinatario, Mensagem msg) async {
     await db
         .collection("mensagens")
         .document(idRemetente)
@@ -98,16 +116,59 @@ class _MensagensState extends State<Mensagens> {
 
     //Limpa texto
     _controllerMensagem.clear();
+  }
+
+  _startRecord() async {
+    await Permission.microphone.request().isGranted;
+    if (await AudioRecorder.hasPermissions) {
+      print("GRAVANDO Algo de errado não esta certo");
+    }
+
+    try {
+      _recording = true;
+      setState(() {});
+      final directory = await getApplicationDocumentsDirectory();
+      var filename =
+          'aud_' + DateTime.now().millisecondsSinceEpoch.toString() + '';
+      String path = directory.path + '/' + filename;
+
+      // Check permissions before starting
+      bool hasPermissions = await AudioRecorder.hasPermissions;
+      // Get the state of the recorder
+      bool isRecording = await AudioRecorder.isRecording;
+      // Start recording
+      print(directory.path);
+
+      await AudioRecorder.start(
+          path: path, audioOutputFormat: AudioOutputFormat.AAC);
+      print("GRAVANDO ");
+
+    } catch (e) {
+      print("GRAVANDO deu Erro");
+      print(e.message);
+      _recording = false;
+      setState(() {});
+    }
 
   }
 
-  @override
-  void dispose() {
-    if (myRecorder != null) {
-      myRecorder.closeAudioSession();
-      myPlayer = null;
+  _stopRecord() async {
+    try {
+      _recording = false;
+      setState(() {});
+      // Stop recording
+      Recording recording = await AudioRecorder.stop();
+      print(
+          "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
+      var audio = File(recording.path);
+//        uploadFile('audio', audio);
+      print("Gravando STOP");
+      setState(() {
+        caminho = recording.path;
+      });
+    } catch (err) {
+      print('stopRecorder error: $err');
     }
-    super.dispose();
   }
 
   _executar() async {
@@ -148,7 +209,7 @@ class _MensagensState extends State<Mensagens> {
       print("GRAVANDO");
 
     } catch (e) {
-      print("GRAVANDO Erro");
+      print("GRAVANDO deu Erro");
       print(e.message);
       _recording = false;
       setState(() {});
@@ -173,8 +234,9 @@ class _MensagensState extends State<Mensagens> {
           "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
       var audio = File(recording.path);
 //        uploadFile('audio', audio);
+      print("Gravando STOP");
       setState(() {
-        caminha = recording.path;
+        caminho = recording.path;
       });
     } catch (err) {
       print('stopRecorder error: $err');
@@ -182,35 +244,27 @@ class _MensagensState extends State<Mensagens> {
 //    }
 
   }
-
   _parar() async {
 
 //    int resultado = await audioPlayer.stop();
 //    if( resultado == 1 ){
 //      //sucesso
 //    }
-        if( primeiraExecucao ){
-
-          audioPlayer =  (await audioPlayer.play(caminha, isLocal: true)) as AudioPlayer;
-//      audioPlayer = (await audioPlayer.play(caminha)) as AudioPlayer;
+    if( primeiraExecucao ){
+      print("Play antes");
+      audioPlayer =  (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
+      print("Play depois 1");
+//          audioPlayer = (await audioPlayer.play(caminho)) as AudioPlayer;
       primeiraExecucao = false;
     }else{
       audioPlayer.resume();
     }
 
   }
-  FlutterSoundRecorder myPlayer = FlutterSoundRecorder(); // Instanciando
-  FlutterSoundRecorder myRecorder = FlutterSoundRecorder(); // Minha Gravação
-  AudioCache audioCache = AudioCache(prefix: "audios/");
-  AudioPlayer audioPlayer = AudioPlayer();
-  bool primeiraExecucao = true;
-  bool _recording = false;
 
   // ainda não envia
   _enviarAudio() async {
-
 //    audioPlayer = await audioCache.play("musica.mp3");
-
     showDialog (
         context: context,
         builder:(context){
@@ -227,27 +281,27 @@ class _MensagensState extends State<Mensagens> {
                       children: <Widget>[
 
                         Padding(
-                          padding: EdgeInsets.all(8),
+                          padding: EdgeInsets.all(12),
                           child: GestureDetector(
-                            child: Image.asset("assets/imagens/executar.png"),
+                            child: Icon(Icons.mic),
                             onTap: (){
                               _executar();
                             },
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8),
+                          padding: EdgeInsets.all(12),
                           child: GestureDetector(
-                            child: Image.asset("assets/imagens/pausar.png"),
+                            child: Icon(Icons.stop),
                             onTap: (){
                               _pausar();
                             },
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8),
+                          padding: EdgeInsets.all(12),
                           child: GestureDetector(
-                            child: Image.asset("assets/imagens/parar.png"),
+                            child: Icon(Icons.play_arrow),
                             onTap: (){
                               _parar();
                             },
@@ -304,6 +358,16 @@ class _MensagensState extends State<Mensagens> {
 
   }
 
+  _recuperarDadosUsuario() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    FirebaseUser usuarioLogado = await auth.currentUser();
+    _idUsuarioLogado = usuarioLogado.uid;
+    _idUsuarioDestinatario = widget.contato.idUsuario;
+
+    _adicionarListenerMensagens();
+
+  }
+
   Future _recuperarUrlImagem(StorageTaskSnapshot snapshot) async {
 
     String url = await snapshot.ref.getDownloadURL();
@@ -320,16 +384,6 @@ class _MensagensState extends State<Mensagens> {
 
     //Salvar mensagem para o destinatário
     _salvarMensagem(_idUsuarioDestinatario, _idUsuarioLogado, mensagem);
-
-  }
-
-  _recuperarDadosUsuario() async {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    FirebaseUser usuarioLogado = await auth.currentUser();
-    _idUsuarioLogado = usuarioLogado.uid;
-    _idUsuarioDestinatario = widget.contato.idUsuario;
-
-    _adicionarListenerMensagens();
 
   }
 
@@ -351,12 +405,6 @@ class _MensagensState extends State<Mensagens> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _recuperarDadosUsuario();
-  }
-
-  @override
   Widget build(BuildContext context) {
 
     var caixaMensagem = Container(
@@ -372,38 +420,82 @@ class _MensagensState extends State<Mensagens> {
                 keyboardType: TextInputType.text,
                 style: TextStyle(fontSize: 20),
                 decoration: InputDecoration(
-                    contentPadding: EdgeInsets.fromLTRB(32, 8, 32, 8),
-                    hintText: "Digite uma mensagem...",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(32)),
-                    prefixIcon:
-                      _subindoImagem
-                        ? CircularProgressIndicator()
-                        : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
-                    suffixIcon:
-                      _subindoImagem
-                        ? CircularProgressIndicator()
-                        : IconButton(icon: Icon(Icons.mic),onPressed: _enviarAudio),
+                  contentPadding: EdgeInsets.fromLTRB(32, 8, 32, 8),
+                  hintText: "Digite uma mensagem...",
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(32)),
+//                    prefixIcon:
+                  suffixIcon:
+                  _subindoImagem
+                      ? CircularProgressIndicator()
+//                        : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
+                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarAudio),
+                  prefixIcon:
+                  _subindoImagem
+                      ? CircularProgressIndicator()
+                      : IconButton(icon: Icon(Icons.mic),onPressed: _enviarAudio),
+//                      : GestureDetector (
+//                    onLongPressStart: (details) {
+//                      print("DEDO EM CIMA");
+//                      _startRecord();
+//                    },
+//                    onLongPressEnd: (details) async {
+//                      print("DEDO saiu");
+//                      await Future.delayed(
+//                          Duration(seconds: 1));
+//                      _stopRecord();
+//                    },child: Stack(
+//                    overflow: Overflow.visible,
+//                    children: [
+//                      !_recording
+//                          ? Container()
+//                          : Positioned(
+//                        bottom: -50,
+//                        right: -50,
+//                        child: Container(
+//                          width: 150,
+//                          height: 150,
+//                          decoration: BoxDecoration(
+//                              borderRadius:
+//                              BorderRadius
+//                                  .circular(
+//                                  360),
+//                              color: Color(0xff2A5E8e)),
+//                        ),
+//                      ),
+//                      IconButton(
+//                          icon: Icon(
+//                            Icons.mic,
+//                            color: _recording
+//                                ? Colors.red
+//                                : Colors.black,
+//                          ),
+//                          onPressed: () {},
+//                          color: Color(0xff2A5E8e)
+//                      ),
+//                    ],
+//                  ),
+//                  ),
                 ),
               ),
             ),
           ),
           Platform.isIOS
               ? CupertinoButton(
-                  child: Text("Enviar"),
-                  onPressed: _enviarMensagem,
-                )
+            child: Text("Enviar"),
+            onPressed: _enviarMensagem,
+          )
               : FloatingActionButton(
-                  backgroundColor: Color(0xff075E54),
-                  child: Icon(
-                    Icons.send,
-                    color: Colors.white,
-                  ),
-                  mini: true,
-                  onPressed: _enviarMensagem,
-                )
+            backgroundColor: Color(0xff2A5E8e),
+            child: Icon(
+              Icons.send,
+              color: Colors.white,
+            ),
+            mini: true,
+            onPressed: _enviarMensagem,
+          )
         ],
       ),
     );
@@ -467,7 +559,7 @@ class _MensagensState extends State<Mensagens> {
                               decoration: BoxDecoration(
                                   color: cor,
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(8))),
+                                  BorderRadius.all(Radius.circular(8))),
                               child:
                               item["tipo"] == "texto"
                                   ? Text(item["mensagem"],style: TextStyle(fontSize: 18),)
@@ -479,7 +571,6 @@ class _MensagensState extends State<Mensagens> {
                 ),
               );
             }
-
             break;
         }
       },
@@ -509,14 +600,14 @@ class _MensagensState extends State<Mensagens> {
                 image: AssetImage("imagens/bg.png"), fit: BoxFit.cover)),
         child: SafeArea(
             child: Container(
-          padding: EdgeInsets.all(8),
-          child: Column(
-            children: <Widget>[
-              stream,
-              caixaMensagem,
-            ],
-          ),
-        )),
+              padding: EdgeInsets.all(8),
+              child: Column(
+                children: <Widget>[
+                  stream,
+                  caixaMensagem,
+                ],
+              ),
+            )),
       ),
     );
   }
