@@ -35,12 +35,13 @@ class _MensagensState extends State<Mensagens> {
 //Após implementação de gravar
   FocusNode focus = new FocusNode();
   String caminho = "";
-  FlutterSoundRecorder myPlayer = FlutterSoundRecorder(); // Instanciando
-  FlutterSoundRecorder myRecorder = FlutterSoundRecorder(); // Minha Gravação
+  FlutterSoundRecorder myPlayer = FlutterSoundRecorder();
+  FlutterSoundRecorder myRecorder = FlutterSoundRecorder();
   AudioCache audioCache = AudioCache(prefix: "audios/");
   AudioPlayer audioPlayer = AudioPlayer();
   bool primeiraExecucao = true;
   bool _recording = false;
+  bool _btnEnviar = false;
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
   ScrollController _scrollController = ScrollController();
@@ -80,6 +81,7 @@ class _MensagensState extends State<Mensagens> {
       //Salvar conversa
       _salvarConversa( mensagem );
 
+      focus.unfocus(); // fecha o teclado
     }
   }
 
@@ -404,6 +406,15 @@ class _MensagensState extends State<Mensagens> {
 
   }
 
+  _verifica(){
+
+    if (_controllerMensagem.text.isEmpty) {
+     return _btnEnviar = true;
+    } else {
+      return _btnEnviar = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -416,6 +427,11 @@ class _MensagensState extends State<Mensagens> {
               padding: EdgeInsets.only(right: 8),
               child: TextField(
                 controller: _controllerMensagem,
+                onChanged: (_){
+                  setState(() {
+                    _verifica();
+                  });
+                },
                 focusNode: focus,
                 keyboardType: TextInputType.text,
                 style: TextStyle(fontSize: 20),
@@ -426,58 +442,11 @@ class _MensagensState extends State<Mensagens> {
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(32)),
-//                    prefixIcon:
                   suffixIcon:
                   _subindoImagem
                       ? CircularProgressIndicator()
-//                        : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
+//                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
                       : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarAudio),
-                  prefixIcon:
-                  _subindoImagem
-                      ? CircularProgressIndicator()
-                      : IconButton(icon: Icon(Icons.mic),onPressed: _enviarAudio),
-//                      : GestureDetector (
-//                    onLongPressStart: (details) {
-//                      print("DEDO EM CIMA");
-//                      _startRecord();
-//                    },
-//                    onLongPressEnd: (details) async {
-//                      print("DEDO saiu");
-//                      await Future.delayed(
-//                          Duration(seconds: 1));
-//                      _stopRecord();
-//                    },child: Stack(
-//                    overflow: Overflow.visible,
-//                    children: [
-//                      !_recording
-//                          ? Container()
-//                          : Positioned(
-//                        bottom: -50,
-//                        right: -50,
-//                        child: Container(
-//                          width: 150,
-//                          height: 150,
-//                          decoration: BoxDecoration(
-//                              borderRadius:
-//                              BorderRadius
-//                                  .circular(
-//                                  360),
-//                              color: Color(0xff2A5E8e)),
-//                        ),
-//                      ),
-//                      IconButton(
-//                          icon: Icon(
-//                            Icons.mic,
-//                            color: _recording
-//                                ? Colors.red
-//                                : Colors.black,
-//                          ),
-//                          onPressed: () {},
-//                          color: Color(0xff2A5E8e)
-//                      ),
-//                    ],
-//                  ),
-//                  ),
                 ),
               ),
             ),
@@ -487,7 +456,49 @@ class _MensagensState extends State<Mensagens> {
             child: Text("Enviar"),
             onPressed: _enviarMensagem,
           )
-              : FloatingActionButton(
+              : _verifica() ? GestureDetector (
+                    onLongPressStart: (details) {
+                      print("DEDO EM CIMA");
+                      _startRecord();
+                    },
+                    onLongPressEnd: (details) async {
+                      print("DEDO saiu");
+                      await Future.delayed(
+                          Duration(seconds: 1));
+                      _stopRecord();
+                    },child: Stack(
+                    overflow: Overflow.visible,
+                    children: [
+                      !_recording
+                          ? Container()
+                          : Positioned(
+                        bottom: -50,
+                        right: -50,
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                              borderRadius:
+                              BorderRadius
+                                  .circular(
+                                  360),
+                              color: Color(0xff2A5E8e)),
+                        ),
+                      ),
+                      IconButton(
+                          icon: Icon(
+                            Icons.mic,
+                            color: _recording
+                                ? Colors.red
+                                : Color(0xff2A5E8e),
+                          ),
+                          onPressed: () {},
+                          color: Color(0xff2A5E8e)
+                      ),
+                    ],
+                  ),
+              ) :
+          FloatingActionButton(
             backgroundColor: Color(0xff2A5E8e),
             child: Icon(
               Icons.send,
@@ -495,7 +506,8 @@ class _MensagensState extends State<Mensagens> {
             ),
             mini: true,
             onPressed: _enviarMensagem,
-          )
+          ),
+
         ],
       ),
     );
