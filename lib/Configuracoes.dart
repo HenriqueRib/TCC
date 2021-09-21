@@ -184,7 +184,7 @@ class _ConfiguracoesState extends State<Configuracoes> {
                   padding: EdgeInsets.only(bottom: 8),
                   child: TextField(
                     controller: _controllerNome,
-                    autofocus: true,
+                    autofocus: false,
                     keyboardType: TextInputType.text,
                     style: TextStyle(fontSize: 20),
                     /*onChanged: (texto){

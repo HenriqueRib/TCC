@@ -80,7 +80,6 @@ class _MensagensState extends State<Mensagens> {
 
       //Salvar conversa
       _salvarConversa( mensagem );
-
       focus.unfocus(); // fecha o teclado
     }
   }
@@ -163,7 +162,7 @@ class _MensagensState extends State<Mensagens> {
       print(
           "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
       var audio = File(recording.path);
-//        uploadFile('audio', audio);
+        _uploadFile( audio );
       print("Gravando STOP");
       setState(() {
         caminho = recording.path;
@@ -171,6 +170,47 @@ class _MensagensState extends State<Mensagens> {
     } catch (err) {
       print('stopRecorder error: $err');
     }
+  }
+
+  _verifica(){
+    _controllerMensagem.text.isEmpty ? _btnEnviar = true :  _btnEnviar = false;
+    return _btnEnviar;
+  }
+
+  _uploadFile(audio){
+
+    _subindoImagem = true;
+    String nomeAudio = DateTime.now().millisecondsSinceEpoch.toString();
+    FirebaseStorage storage = FirebaseStorage.instance;
+    StorageReference pastaRaiz = storage.ref();
+    StorageReference arquivo = pastaRaiz
+        .child("mensagens")
+        .child( _idUsuarioLogado )
+        .child( nomeAudio );
+
+    //Upload do audio
+    StorageUploadTask task = arquivo.putFile( audio );
+
+    //Controlar progresso do upload
+    task.events.listen((StorageTaskEvent storageEvent){
+
+      if( storageEvent.type == StorageTaskEventType.progress ){
+        setState(() {
+          _subindoImagem = true;
+        });
+      }else if( storageEvent.type == StorageTaskEventType.success ){
+        setState(() {
+          _subindoImagem = false;
+        });
+      }
+
+    });
+
+    //Recuperar url do Audio
+    task.onComplete.then((StorageTaskSnapshot snapshot){
+      _recuperarUrlAudio(snapshot);
+    });
+
   }
 
   _executar() async {
@@ -252,6 +292,8 @@ class _MensagensState extends State<Mensagens> {
 //    if( resultado == 1 ){
 //      //sucesso
 //    }
+
+  print(caminho);
     if( primeiraExecucao ){
       print("Play antes");
       audioPlayer =  (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
@@ -309,7 +351,6 @@ class _MensagensState extends State<Mensagens> {
                             },
                           ),
                         )
-
                       ],
                     )
                   ],
@@ -320,6 +361,7 @@ class _MensagensState extends State<Mensagens> {
         }
     );
   }
+
 
   _enviarFoto() async {
 
@@ -389,6 +431,25 @@ class _MensagensState extends State<Mensagens> {
 
   }
 
+  Future _recuperarUrlAudio(StorageTaskSnapshot snapshot) async {
+
+    String url = await snapshot.ref.getDownloadURL();
+
+    Mensagem mensagem = Mensagem();
+    mensagem.idUsuario = _idUsuarioLogado;
+    mensagem.mensagem = "";
+    mensagem.urlImagem = url;
+    mensagem.tipo = "audio";
+    mensagem.data = Timestamp.now().toString();
+
+    //Salvar mensagem para remetente
+    _salvarMensagem(_idUsuarioLogado, _idUsuarioDestinatario, mensagem);
+
+    //Salvar mensagem para o destinatário
+    _salvarMensagem(_idUsuarioDestinatario, _idUsuarioLogado, mensagem);
+
+  }
+
   Stream<QuerySnapshot> _adicionarListenerMensagens(){
 
     final stream = db.collection("mensagens")
@@ -404,15 +465,6 @@ class _MensagensState extends State<Mensagens> {
       } );
     });
 
-  }
-
-  _verifica(){
-
-    if (_controllerMensagem.text.isEmpty) {
-     return _btnEnviar = true;
-    } else {
-      return _btnEnviar = false;
-    }
   }
 
   @override
@@ -436,8 +488,8 @@ class _MensagensState extends State<Mensagens> {
                 keyboardType: TextInputType.text,
                 style: TextStyle(fontSize: 20),
                 decoration: InputDecoration(
-                  contentPadding: EdgeInsets.fromLTRB(32, 8, 32, 8),
-                  hintText: "Digite uma mensagem...",
+                  contentPadding: EdgeInsets.fromLTRB(25, 8, 5, 8),
+                  hintText: "Digite uma mensagem ...",
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -514,6 +566,7 @@ class _MensagensState extends State<Mensagens> {
 
     var stream = StreamBuilder(
       stream: _controller.stream,
+      // ignore: missing_return
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
@@ -575,7 +628,19 @@ class _MensagensState extends State<Mensagens> {
                               child:
                               item["tipo"] == "texto"
                                   ? Text(item["mensagem"],style: TextStyle(fontSize: 18),)
-                                  : Image.network(item["urlImagem"]),
+                                  : item["tipo"] == "imagem"
+                                  ? Image.network(item["urlImagem"])
+                                  : IconButton(
+                                    icon: Icon(Icons.play_arrow),
+                                onPressed: () {
+
+                                  setState(() {
+                                    caminho = item["urlImagem"];
+                                  });
+                                  _parar();
+                                },
+                              ),
+//                              Text(item["mensagem"],style: TextStyle(fontSize: 18),),
                             ),
                           ),
                         );

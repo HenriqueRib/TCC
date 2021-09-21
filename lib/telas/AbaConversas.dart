@@ -12,7 +12,7 @@ class AbaConversas extends StatefulWidget {
 
 class _AbaConversasState extends State<AbaConversas> {
 
-  List<Conversa> _listaConversas = List();
+//  List<Conversa> _listaConversas = List();
   final _controller = StreamController<QuerySnapshot>.broadcast();
   Firestore db = Firestore.instance;
   String _idUsuarioLogado;
@@ -21,23 +21,16 @@ class _AbaConversasState extends State<AbaConversas> {
   void initState() {
     super.initState();
     _recuperarDadosUsuario();
-
-    Conversa conversa = Conversa();
-    conversa.nome = "Ana Clara";
-    conversa.mensagem = "Olá tudo bem?";
-    conversa.caminhoFoto = "https://firebasestorage.googleapis.com/v0/b/whatsapp-36cd8.appspot.com/o/perfil%2Fperfil1.jpg?alt=media&token=97a6dbed-2ede-4d14-909f-9fe95df60e30";
-
-    _listaConversas.add(conversa);
-
   }
 
   Stream<QuerySnapshot> _adicionarListenerConversas(){
+    print(_idUsuarioLogado);
 
     final stream = db.collection("conversas")
         .document( _idUsuarioLogado )
         .collection("ultima_conversa")
         .snapshots();
-
+    print(stream);
     stream.listen((dados){
       _controller.add( dados );
     });
@@ -51,8 +44,6 @@ class _AbaConversasState extends State<AbaConversas> {
     _idUsuarioLogado = usuarioLogado.uid;
 
     _adicionarListenerConversas();
-
-
   }
 
   @override
@@ -98,11 +89,13 @@ class _AbaConversasState extends State<AbaConversas> {
                   ),
                 );
               }
+              List<DocumentSnapshot> conversas = querySnapshot.documents.toList();
+              int _itemCount = conversas.length.toInt();
 
               return ListView.builder(
-                  itemCount: _listaConversas.length,
-                  itemBuilder: (context, indice){
 
+                  itemCount: _itemCount,
+                  itemBuilder: (context, indice){
                     List<DocumentSnapshot> conversas = querySnapshot.documents.toList();
                     DocumentSnapshot item = conversas[indice];
 
@@ -150,15 +143,11 @@ class _AbaConversasState extends State<AbaConversas> {
                           )
                       ),
                     );
-
                   }
               );
-
             }
         }
       },
     );
-
-
   }
 }
