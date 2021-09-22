@@ -41,7 +41,6 @@ class _ConfiguracoesState extends State<Configuracoes> {
   }
 
   Future _uploadImagem() async {
-
     FirebaseStorage storage = FirebaseStorage.instance;
     StorageReference pastaRaiz = storage.ref();
     StorageReference arquivo = pastaRaiz
@@ -114,7 +113,6 @@ class _ConfiguracoesState extends State<Configuracoes> {
   }
 
   _recuperarDadosUsuario() async {
-
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser usuarioLogado = await auth.currentUser();
     _idUsuarioLogado = usuarioLogado.uid;
@@ -128,15 +126,17 @@ class _ConfiguracoesState extends State<Configuracoes> {
     _controllerNome.text = dados["nome"];
 
     if( dados["urlImagem"] != null ){
-      _urlImagemRecuperada = dados["urlImagem"];
+      setState(() {
+        _urlImagemRecuperada = dados["urlImagem"];
+      });
     }
 
   }
 
   @override
   void initState() {
-    super.initState();
     _recuperarDadosUsuario();
+    super.initState();
   }
 
   @override
@@ -206,7 +206,7 @@ class _ConfiguracoesState extends State<Configuracoes> {
                         "Salvar",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
-                      color: Color(0xff91998A),
+                      color: Color(0xff2A5E8e),
                       padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32)),

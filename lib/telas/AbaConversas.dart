@@ -12,11 +12,10 @@ class AbaConversas extends StatefulWidget {
 
 class _AbaConversasState extends State<AbaConversas> {
 
-//  List<Conversa> _listaConversas = List();
   final _controller = StreamController<QuerySnapshot>.broadcast();
   Firestore db = Firestore.instance;
   String _idUsuarioLogado;
-
+  int _itemCount = 0;
   @override
   void initState() {
     super.initState();
@@ -30,8 +29,9 @@ class _AbaConversasState extends State<AbaConversas> {
         .document( _idUsuarioLogado )
         .collection("ultima_conversa")
         .snapshots();
-    print(stream);
+
     stream.listen((dados){
+       _itemCount = dados.documents.length;
       _controller.add( dados );
     });
 
@@ -89,8 +89,6 @@ class _AbaConversasState extends State<AbaConversas> {
                   ),
                 );
               }
-              List<DocumentSnapshot> conversas = querySnapshot.documents.toList();
-              int _itemCount = conversas.length.toInt();
 
               return ListView.builder(
 

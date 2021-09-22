@@ -29,6 +29,8 @@ class _MensagensState extends State<Mensagens> {
 
   bool _subindoImagem = false;
   String _idUsuarioLogado;
+  String _fotoUsuarioLogado;
+  String _fotoAudio;
   String _idUsuarioDestinatario;
   Firestore db = Firestore.instance;
   TextEditingController _controllerMensagem = TextEditingController();
@@ -406,6 +408,16 @@ class _MensagensState extends State<Mensagens> {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser usuarioLogado = await auth.currentUser();
     _idUsuarioLogado = usuarioLogado.uid;
+
+    //Recupera Foto Perfil Usuario
+    final stream = db.collection("usuarios")
+        .document( _idUsuarioLogado )
+        .snapshots();
+    stream.listen((dados){
+      _fotoUsuarioLogado = dados.data['urlImagem'];
+    });
+    //Finaliza recupera Foto Perfil usuario
+
     _idUsuarioDestinatario = widget.contato.idUsuario;
 
     _adicionarListenerMensagens();
@@ -464,7 +476,6 @@ class _MensagensState extends State<Mensagens> {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       } );
     });
-
   }
 
   @override
@@ -497,8 +508,8 @@ class _MensagensState extends State<Mensagens> {
                   suffixIcon:
                   _subindoImagem
                       ? CircularProgressIndicator()
-//                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
-                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarAudio),
+                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
+//                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarAudio),
                 ),
               ),
             ),
@@ -609,9 +620,11 @@ class _MensagensState extends State<Mensagens> {
                         //Define cores e alinhamentos
                         Alignment alinhamento = Alignment.centerRight;
                         Color cor = Color(0xffd2ffa5);
+                        _fotoAudio = _fotoUsuarioLogado;
                         if ( _idUsuarioLogado != item["idUsuario"] ) {
                           alinhamento = Alignment.centerLeft;
                           cor = Colors.white;
+                          _fotoAudio = widget.contato.urlImagem ;
                         }
 
                         return Align(
@@ -630,15 +643,30 @@ class _MensagensState extends State<Mensagens> {
                                   ? Text(item["mensagem"],style: TextStyle(fontSize: 18),)
                                   : item["tipo"] == "imagem"
                                   ? Image.network(item["urlImagem"])
-                                  : IconButton(
-                                    icon: Icon(Icons.play_arrow),
-                                onPressed: () {
-
-                                  setState(() {
-                                    caminho = item["urlImagem"];
-                                  });
-                                  _parar();
-                                },
+                                  : Row(
+                                children: <Widget>[
+                                  CircleAvatar(
+                                      maxRadius: 30,
+                                      backgroundColor: Colors.grey,
+                                      backgroundImage: NetworkImage(_fotoAudio)
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 10),
+                                    child: IconButton(
+                                      icon: Icon(Icons.play_arrow, size: 40,),
+                                      onPressed: () {
+                                        setState(() {
+                                          caminho = item["urlImagem"];
+                                        });
+                                        _parar();
+                                      },
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 8),
+                                    child: Text(widget.contato.nome),
+                                  ),
+                                ],
                               ),
 //                              Text(item["mensagem"],style: TextStyle(fontSize: 18),),
                             ),
@@ -665,7 +693,7 @@ class _MensagensState extends State<Mensagens> {
                     : null),
             Padding(
               padding: EdgeInsets.only(left: 8),
-              child: Text(widget.contato.nome),
+              child: Text(widget.contato.nome ),
             )
           ],
         ),
@@ -675,6 +703,9 @@ class _MensagensState extends State<Mensagens> {
         decoration: BoxDecoration(
             image: DecorationImage(
                 image: AssetImage("imagens/bg.png"), fit: BoxFit.cover)),
+            //    image: AssetImage("imagens/bg.png"), fit: BoxFit.cover)),
+            //    image: AssetImage("imagens/bg.png"), fit: BoxFit.cover)),
+            //    image: AssetImage("imagens/bg.png"), fit: BoxFit.cover)),
         child: SafeArea(
             child: Container(
               padding: EdgeInsets.all(8),
