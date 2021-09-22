@@ -44,6 +44,8 @@ class _MensagensState extends State<Mensagens> {
   bool primeiraExecucao = true;
   bool _recording = false;
   bool _btnEnviar = false;
+  // Implementação cores
+  String _bg = "imagens/bg.png";
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
   ScrollController _scrollController = ScrollController();
@@ -154,7 +156,6 @@ class _MensagensState extends State<Mensagens> {
     }
 
   }
-
   _stopRecord() async {
     try {
       _recording = false;
@@ -172,6 +173,19 @@ class _MensagensState extends State<Mensagens> {
     } catch (err) {
       print('stopRecorder error: $err');
     }
+  }
+  _playRecord() async {
+
+    if( primeiraExecucao ){
+      _bg = "imagens/bg1.png";
+      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
+//          audioPlayer = (await audioPlayer.play(caminho)) as AudioPlayer;
+      primeiraExecucao = false;
+
+    }else{
+      audioPlayer = (await audioPlayer.resume()) as AudioPlayer;
+    }
+
   }
 
   _verifica(){
@@ -215,22 +229,15 @@ class _MensagensState extends State<Mensagens> {
 
   }
 
-  _executar() async {
+  //Gravar , Debug. Apagar depois
+  _gravar() async {
 
-//    if( primeiraExecucao ){
-//      audioPlayer = await audioCache.play("musica.mp3");
-//      primeiraExecucao = false;
-//    }else{
-//      audioPlayer.resume();
-//    }
     await Permission.microphone.request().isGranted;
 //    print(await Permission.microphone.request().isGranted);
     if (await AudioRecorder.hasPermissions) {
       print("GRAVANDO Algo de errado não esta certo");
     }
 
-
-//    _startRecord() async {
     try {
       _recording = true;
       setState(() {});
@@ -244,7 +251,7 @@ class _MensagensState extends State<Mensagens> {
 
       // Get the state of the recorder
       bool isRecording = await AudioRecorder.isRecording;
-      print("GRAVANDODentro");
+
       // Start recording
       print(directory.path);
 
@@ -258,17 +265,10 @@ class _MensagensState extends State<Mensagens> {
       _recording = false;
       setState(() {});
     }
-//    }
-
 
   }
   _pausar() async {
-//    int resultado = await audioPlayer.pause();
-//    if( resultado == 1 ){
-//      //sucesso
-//    }
 
-//    _stopRecord() async {
     try {
       _recording = false;
       setState(() {});
@@ -290,27 +290,21 @@ class _MensagensState extends State<Mensagens> {
   }
   _parar() async {
 
-//    int resultado = await audioPlayer.stop();
-//    if( resultado == 1 ){
-//      //sucesso
-//    }
-
-  print(caminho);
     if( primeiraExecucao ){
       print("Play antes");
       audioPlayer =  (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
-      print("Play depois 1");
 //          audioPlayer = (await audioPlayer.play(caminho)) as AudioPlayer;
       primeiraExecucao = false;
+
     }else{
       audioPlayer.resume();
     }
 
   }
 
-  // ainda não envia
-  _enviarAudio() async {
-//    audioPlayer = await audioCache.play("musica.mp3");
+  // Função de Debug. Apagar depois
+  _caixaDialogo() async {
+
     showDialog (
         context: context,
         builder:(context){
@@ -331,7 +325,7 @@ class _MensagensState extends State<Mensagens> {
                           child: GestureDetector(
                             child: Icon(Icons.mic),
                             onTap: (){
-                              _executar();
+                              _gravar();
                             },
                           ),
                         ),
@@ -363,7 +357,6 @@ class _MensagensState extends State<Mensagens> {
         }
     );
   }
-
 
   _enviarFoto() async {
 
@@ -509,7 +502,7 @@ class _MensagensState extends State<Mensagens> {
                   _subindoImagem
                       ? CircularProgressIndicator()
                       : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
-//                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarAudio),
+//                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _caixaDialogo),
                 ),
               ),
             ),
@@ -655,10 +648,12 @@ class _MensagensState extends State<Mensagens> {
                                     child: IconButton(
                                       icon: Icon(Icons.play_arrow, size: 40,),
                                       onPressed: () {
+
                                         setState(() {
                                           caminho = item["urlImagem"];
                                         });
-                                        _parar();
+                                        _playRecord();
+
                                       },
                                     ),
                                   ),
@@ -702,10 +697,7 @@ class _MensagensState extends State<Mensagens> {
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
             image: DecorationImage(
-                image: AssetImage("imagens/bg.png"), fit: BoxFit.cover)),
-            //    image: AssetImage("imagens/bg.png"), fit: BoxFit.cover)),
-            //    image: AssetImage("imagens/bg.png"), fit: BoxFit.cover)),
-            //    image: AssetImage("imagens/bg.png"), fit: BoxFit.cover)),
+                image: AssetImage(_bg), fit: BoxFit.cover)),
         child: SafeArea(
             child: Container(
               padding: EdgeInsets.all(8),

@@ -61,6 +61,9 @@ flutter:
      - imagens/logo.png
      - imagens/usuario.png
      - imagens/bg.png
+     - imagens/bg1.png
+     - imagens/bg2.png
+     - imagens/bg3.png
      - assets/imagens/executar.png
      - assets/imagens/parar.png
      - assets/imagens/pausar.png
