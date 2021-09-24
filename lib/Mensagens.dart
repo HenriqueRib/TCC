@@ -174,17 +174,55 @@ class _MensagensState extends State<Mensagens> {
       print('stopRecorder error: $err');
     }
   }
+
+  bg1() async{
+    sleep(Duration(seconds: 1));
+    _bg = "imagens/bg1.png";
+    bg2().then((_){
+
+    });
+  }
+
+  bg2() async{
+    sleep(Duration(seconds: 5));
+    _bg = "imagens/bg2.png";
+  }
+
+  bg3() async{
+    sleep(Duration(seconds: 9));
+    _bg = "imagens/bg1.png";
+
+
+  }
+
   _playRecord() async {
 
-    if( primeiraExecucao ){
-      _bg = "imagens/bg1.png";
-      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
-//          audioPlayer = (await audioPlayer.play(caminho)) as AudioPlayer;
-      primeiraExecucao = false;
+    bg1().then((_){
+    });
 
-    }else{
-      audioPlayer = (await audioPlayer.resume()) as AudioPlayer;
-    }
+    bg2().then((_){
+
+    });
+
+    bg3().then((_){
+
+    });
+
+//    if( primeiraExecucao == true ){
+////      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
+//
+//      await audioPlayer.play(caminho,isLocal: true);
+//
+//
+//
+//      primeiraExecucao = false;
+//
+//      print("Foiiii stop");
+//    }else{
+//      await audioPlayer.resume();
+//      primeiraExecucao = true;
+//
+//    }
 
   }
 
