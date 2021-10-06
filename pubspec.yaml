@@ -40,6 +40,7 @@ dependencies:
   intl: ^0.16.1
   flutter_sound_lite: ^7.6.4+2
   audioplayers: ^0.12.0
+#  audioplayers_with_rate: 1.0.2
   audio_recorder: ^1.0.2
   rflutter_alert: ^1.1.0
 

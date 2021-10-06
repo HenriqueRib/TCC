@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -44,6 +45,8 @@ class _MensagensState extends State<Mensagens> {
   bool primeiraExecucao = true;
   bool _recording = false;
   bool _btnEnviar = false;
+  String _tempoupload;
+  bool _subindoAudio = false;
   // Implementação cores
   String _bg = "imagens/bg.png";
 
@@ -165,7 +168,8 @@ class _MensagensState extends State<Mensagens> {
       print(
           "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
       var audio = File(recording.path);
-        _uploadFile( audio );
+      var tempo = recording.duration;
+        _uploadFile( audio, tempo );
       print("Gravando STOP");
       setState(() {
         caminho = recording.path;
@@ -175,54 +179,23 @@ class _MensagensState extends State<Mensagens> {
     }
   }
 
-  bg1() async{
-    sleep(Duration(seconds: 1));
-    _bg = "imagens/bg1.png";
-    bg2().then((_){
-
-    });
-  }
-
-  bg2() async{
-    sleep(Duration(seconds: 5));
-    _bg = "imagens/bg2.png";
-  }
-
-  bg3() async{
-    sleep(Duration(seconds: 9));
-    _bg = "imagens/bg1.png";
-
-
-  }
-
   _playRecord() async {
 
-    bg1().then((_){
-    });
+    if( primeiraExecucao == true ){
+//      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
+      await audioPlayer.play(caminho,isLocal: true);
+      primeiraExecucao = false;
+      print("Audio Executando");
+    }else{
+      await audioPlayer.resume();
+      primeiraExecucao = true;
+    }
 
-    bg2().then((_){
-
-    });
-
-    bg3().then((_){
-
-    });
-
-//    if( primeiraExecucao == true ){
-////      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
-//
-//      await audioPlayer.play(caminho,isLocal: true);
-//
-//
-//
-//      primeiraExecucao = false;
-//
-//      print("Foiiii stop");
-//    }else{
-//      await audioPlayer.resume();
-//      primeiraExecucao = true;
-//
-//    }
+    audioPlayer.onAudioPositionChanged.listen((Duration  p)  {
+        print('Current position: $p');
+//        setState(() {
+//        });
+  });
 
   }
 
@@ -231,7 +204,7 @@ class _MensagensState extends State<Mensagens> {
     return _btnEnviar;
   }
 
-  _uploadFile(audio){
+  _uploadFile(audio , tempo){
 
     _subindoImagem = true;
     String nomeAudio = DateTime.now().millisecondsSinceEpoch.toString();
@@ -257,7 +230,11 @@ class _MensagensState extends State<Mensagens> {
           _subindoImagem = false;
         });
       }
+    });
 
+    // Atualizando tempo para salvar
+    setState(() {
+      _tempoupload = tempo.toString();
     });
 
     //Recuperar url do Audio
@@ -340,6 +317,45 @@ class _MensagensState extends State<Mensagens> {
 
   }
 
+  Duration parseDuration(String s) {
+    int hours = 0;
+    int minutes = 0;
+    int micros;
+    List<String> parts = s.split(':');
+    if (parts.length > 2) {
+      hours = int.parse(parts[parts.length - 3]);
+    }
+    if (parts.length > 1) {
+      minutes = int.parse(parts[parts.length - 2]);
+    }
+    micros = (double.parse(parts[parts.length - 1]) * 1000000).round();
+    return Duration(hours: hours, minutes: minutes, microseconds: micros);
+  }
+  _mudabg(tempoDelay){
+    print(tempoDelay);
+
+    var duracao = parseDuration(tempoDelay);
+    print("teste");
+    print(duracao.inSeconds);
+
+    setState(() {
+      _bg = "imagens/bg1.png";
+    });
+
+    new Timer( Duration(seconds: duracao.inSeconds~/ 4 ), ()=>
+        setState(() {
+          _bg = "imagens/bg2.png";
+        }));
+    new Timer( Duration(seconds: duracao.inSeconds~/ 2), ()=>
+        setState(() {
+          _bg = "imagens/bg3.png";
+        }));
+    new Timer( Duration(seconds: duracao.inSeconds.toInt()), ()=>
+        setState(() {
+          _bg = "imagens/bg.png";
+        }));
+
+  }
   // Função de Debug. Apagar depois
   _caixaDialogo() async {
 
@@ -363,7 +379,7 @@ class _MensagensState extends State<Mensagens> {
                           child: GestureDetector(
                             child: Icon(Icons.mic),
                             onTap: (){
-                              _gravar();
+
                             },
                           ),
                         ),
@@ -372,7 +388,7 @@ class _MensagensState extends State<Mensagens> {
                           child: GestureDetector(
                             child: Icon(Icons.stop),
                             onTap: (){
-                              _pausar();
+
                             },
                           ),
                         ),
@@ -381,7 +397,7 @@ class _MensagensState extends State<Mensagens> {
                           child: GestureDetector(
                             child: Icon(Icons.play_arrow),
                             onTap: (){
-                              _parar();
+                             // _mudabg();
                             },
                           ),
                         )
@@ -480,7 +496,7 @@ class _MensagensState extends State<Mensagens> {
 
     Mensagem mensagem = Mensagem();
     mensagem.idUsuario = _idUsuarioLogado;
-    mensagem.mensagem = "";
+    mensagem.mensagem = _tempoupload;
     mensagem.urlImagem = url;
     mensagem.tipo = "audio";
     mensagem.data = Timestamp.now().toString();
@@ -539,8 +555,8 @@ class _MensagensState extends State<Mensagens> {
                   suffixIcon:
                   _subindoImagem
                       ? CircularProgressIndicator()
-                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
-//                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _caixaDialogo),
+//                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
+                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _caixaDialogo),
                 ),
               ),
             ),
@@ -690,6 +706,7 @@ class _MensagensState extends State<Mensagens> {
                                         setState(() {
                                           caminho = item["urlImagem"];
                                         });
+                                        _mudabg(item["mensagem"]);
                                         _playRecord();
 
                                       },
