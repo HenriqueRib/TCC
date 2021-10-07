@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -157,7 +156,6 @@ class _MensagensState extends State<Mensagens> {
       _recording = false;
       setState(() {});
     }
-
   }
   _stopRecord() async {
     try {
@@ -169,7 +167,7 @@ class _MensagensState extends State<Mensagens> {
           "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
       var audio = File(recording.path);
       var tempo = recording.duration;
-        _uploadFile( audio, tempo );
+      _uploadFile( audio, tempo );
       print("Gravando STOP");
       setState(() {
         caminho = recording.path;
@@ -179,23 +177,63 @@ class _MensagensState extends State<Mensagens> {
     }
   }
 
-  _playRecord() async {
+  _playRecord(time) async {
 
     if( primeiraExecucao == true ){
 //      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
+
       await audioPlayer.play(caminho,isLocal: true);
+      var speed = 5.0;
+      await audioPlayer.setPlaybackRate(playbackRate: speed);
+      await audioPlayer.setVolume(2.0);
+
       primeiraExecucao = false;
       print("Audio Executando");
+      setState(() {
+        _bg = "imagens/bg1.png";
+      });
     }else{
-      await audioPlayer.resume();
+      print("Stop Audio");
+      await audioPlayer.stop();
+      setState(() {
+        _bg = "imagens/bg.png";
+      });
+
       primeiraExecucao = true;
     }
 
+    var duracao_total = parseDuration(time);
+    int possition = 0;
+
     audioPlayer.onAudioPositionChanged.listen((Duration  p)  {
-        print('Current position: $p');
-//        setState(() {
-//        });
-  });
+        print('$possition Current position: $p');
+        possition++;
+
+        if(possition == (duracao_total.inSeconds * 0.5).floor() )
+        {
+          print('Entrou no 2 posi $possition');
+          setState(() {
+            _bg = "imagens/bg2.png";
+          });
+        }
+
+        if(possition == (duracao_total.inSeconds * 0.75).floor() )
+        {
+          print('Entrou no /4 posi $possition');
+          setState(() {
+            _bg = "imagens/bg3.png";
+          });
+        }
+
+        if(possition == duracao_total.inSeconds - 1 )
+        {
+          print('Entrou no -1 posi $possition');
+          setState(() {
+            _bg = "imagens/bg.png";
+          });
+        }
+
+    });
 
   }
 
@@ -206,7 +244,7 @@ class _MensagensState extends State<Mensagens> {
 
   _uploadFile(audio , tempo){
 
-    _subindoImagem = true;
+    _subindoAudio = true;
     String nomeAudio = DateTime.now().millisecondsSinceEpoch.toString();
     FirebaseStorage storage = FirebaseStorage.instance;
     StorageReference pastaRaiz = storage.ref();
@@ -223,11 +261,11 @@ class _MensagensState extends State<Mensagens> {
 
       if( storageEvent.type == StorageTaskEventType.progress ){
         setState(() {
-          _subindoImagem = true;
+          _subindoAudio = true;
         });
       }else if( storageEvent.type == StorageTaskEventType.success ){
         setState(() {
-          _subindoImagem = false;
+          _subindoAudio = false;
         });
       }
     });
@@ -331,6 +369,7 @@ class _MensagensState extends State<Mensagens> {
     micros = (double.parse(parts[parts.length - 1]) * 1000000).round();
     return Duration(hours: hours, minutes: minutes, microseconds: micros);
   }
+
   _mudabg(tempoDelay){
     print(tempoDelay);
 
@@ -356,6 +395,7 @@ class _MensagensState extends State<Mensagens> {
         }));
 
   }
+
   // Função de Debug. Apagar depois
   _caixaDialogo() async {
 
@@ -595,6 +635,8 @@ class _MensagensState extends State<Mensagens> {
                               color: Color(0xff2A5E8e)),
                         ),
                       ),
+                      _subindoAudio
+                          ? CircularProgressIndicator() :
                       IconButton(
                           icon: Icon(
                             Icons.mic,
@@ -706,8 +748,8 @@ class _MensagensState extends State<Mensagens> {
                                         setState(() {
                                           caminho = item["urlImagem"];
                                         });
-                                        _mudabg(item["mensagem"]);
-                                        _playRecord();
+//                                        _mudabg(item["mensagem"]);
+                                        _playRecord(item["mensagem"]);
 
                                       },
                                     ),
