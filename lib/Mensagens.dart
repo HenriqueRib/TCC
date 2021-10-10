@@ -183,7 +183,7 @@ class _MensagensState extends State<Mensagens> {
 //      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
 
       await audioPlayer.play(caminho,isLocal: true);
-      var speed = 5.0;
+      var speed = 4.0;
       await audioPlayer.setPlaybackRate(playbackRate: speed);
       await audioPlayer.setVolume(2.0);
 
