@@ -48,6 +48,10 @@ class _MensagensState extends State<Mensagens> {
   bool _subindoAudio = false;
   // Implementação cores
   String _bg = "imagens/bg.png";
+  //Importante adicionar na documentação depois
+  int possition = 0;
+  var duracao_total ;
+
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
   ScrollController _scrollController = ScrollController();
@@ -181,11 +185,9 @@ class _MensagensState extends State<Mensagens> {
 
     if( primeiraExecucao == true ){
 //      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
-
-      await audioPlayer.play(caminho,isLocal: true);
       var speed = 4.0;
+      await audioPlayer.play(caminho,isLocal: true);
       await audioPlayer.setPlaybackRate(playbackRate: speed);
-      await audioPlayer.setVolume(2.0);
 
       primeiraExecucao = false;
       print("Audio Executando");
@@ -198,20 +200,23 @@ class _MensagensState extends State<Mensagens> {
       setState(() {
         _bg = "imagens/bg.png";
       });
-
       primeiraExecucao = true;
     }
 
-    var duracao_total = parseDuration(time);
-    int possition = 0;
+    duracao_total = parseDuration(time) ;
+    print('Time -> $time');
+    print('Duracao -> $duracao_total');
 
     audioPlayer.onAudioPositionChanged.listen((Duration  p)  {
-        print('$possition Current position: $p');
-        possition++;
+
+      possition = p.inSeconds;
+      print('Possition -> $possition Current position: $p');
+      print('Possition -> $possition ');
 
         if(possition == (duracao_total.inSeconds * 0.5).floor() )
         {
-          print('Entrou no 2 posi $possition');
+          print('Entrou no bg2 -> * 0.5 possition -> $possition');
+          print('Time --> $time');
           setState(() {
             _bg = "imagens/bg2.png";
           });
@@ -219,21 +224,24 @@ class _MensagensState extends State<Mensagens> {
 
         if(possition == (duracao_total.inSeconds * 0.75).floor() )
         {
-          print('Entrou no /4 posi $possition');
+          print('Entrou no bg2 -> * 0.75 possition ->  $possition');
+          print('Time --> $time');
           setState(() {
             _bg = "imagens/bg3.png";
           });
         }
 
-        if(possition == duracao_total.inSeconds - 1 )
-        {
-          print('Entrou no -1 posi $possition');
-          setState(() {
-            _bg = "imagens/bg.png";
-          });
-        }
-
     });
+
+    //Funciona apenas quando termina o audio
+    audioPlayer.onPlayerCompletion.listen((event) {
+      setState(() {
+         possition = 0;
+         duracao_total = 0;
+        _bg = "imagens/bg.png";
+      });
+    });
+
 
   }
 
