@@ -51,6 +51,10 @@ class _MensagensState extends State<Mensagens> {
   //Importante adicionar na documentação depois
   int possition = 0;
   var duracao_total ;
+  bool tocando = false;
+  bool pause = false;
+  bool bgControle = false;
+  int idTocando = 0;
 
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
@@ -181,9 +185,9 @@ class _MensagensState extends State<Mensagens> {
     }
   }
 
-  _playRecord(time) async {
+  _playRecord(time, indice) async {
 
-    if( primeiraExecucao == true ){
+    if( primeiraExecucao == true && pause == false ){
 //      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
       var speed = 4.0;
       await audioPlayer.play(caminho,isLocal: true);
@@ -193,12 +197,22 @@ class _MensagensState extends State<Mensagens> {
       print("Audio Executando");
       setState(() {
         _bg = "imagens/bg1.png";
+        tocando = true;
+        idTocando = indice;
       });
     }else{
-      print("Stop Audio");
-      await audioPlayer.stop();
+      print("Resume Audio");
+      await audioPlayer.resume();
+      await audioPlayer.setPlaybackRate(playbackRate: 4.0);
+
+      if(bgControle == false){
+        setState(() {
+          _bg = "imagens/bg1.png";
+        });
+      }
       setState(() {
-        _bg = "imagens/bg.png";
+        tocando = true;
+        idTocando = indice;
       });
       primeiraExecucao = true;
     }
@@ -208,21 +222,21 @@ class _MensagensState extends State<Mensagens> {
     print('Duracao -> $duracao_total');
 
     audioPlayer.onAudioPositionChanged.listen((Duration  p)  {
-
       possition = p.inSeconds;
       print('Possition -> $possition Current position: $p');
       print('Possition -> $possition ');
 
-        if(possition == (duracao_total.inSeconds * 0.5).floor() )
+        if(possition > (duracao_total.inSeconds * 0.5).floor())
         {
           print('Entrou no bg2 -> * 0.5 possition -> $possition');
           print('Time --> $time');
           setState(() {
+            bgControle = true;
             _bg = "imagens/bg2.png";
           });
         }
 
-        if(possition == (duracao_total.inSeconds * 0.75).floor() )
+        if(possition > (duracao_total.inSeconds * 0.75).floor() )
         {
           print('Entrou no bg2 -> * 0.75 possition ->  $possition');
           print('Time --> $time');
@@ -238,11 +252,36 @@ class _MensagensState extends State<Mensagens> {
       setState(() {
          possition = 0;
          duracao_total = 0;
+         tocando = false;
+         pause = false;
+         bgControle = false;
         _bg = "imagens/bg.png";
       });
     });
 
 
+  }
+
+  _stopAudio() async{
+//    if (pause == false){
+      print("Pause Audio");
+      await audioPlayer.pause();
+      setState(() {
+        _bg = "imagens/bg.png";
+        tocando = false;
+        pause = true;
+        idTocando = 0;
+      });
+//    }
+//Ainda não criei botao para fazer o stop
+//    if (primeiraExecucao == true) {
+//      print("Stop Audio");
+//      await audioPlayer.stop();
+//      setState(() {
+//        _bg = "imagens/bg.png";
+//        tocando = false;
+//      });
+//    }
   }
 
   _verifica(){
@@ -747,6 +786,17 @@ class _MensagensState extends State<Mensagens> {
                                       backgroundColor: Colors.grey,
                                       backgroundImage: NetworkImage(_fotoAudio)
                                   ),
+                                  tocando && idTocando == indice ?
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 10),
+                                    child: IconButton(
+                                      icon: Icon(Icons.pause, size: 40,),
+                                      onPressed: () {
+                                        _stopAudio();
+                                      },
+                                    ),
+                                  )
+                                      :
                                   Padding(
                                     padding: EdgeInsets.only(bottom: 10),
                                     child: IconButton(
@@ -757,7 +807,7 @@ class _MensagensState extends State<Mensagens> {
                                           caminho = item["urlImagem"];
                                         });
 //                                        _mudabg(item["mensagem"]);
-                                        _playRecord(item["mensagem"]);
+                                        _playRecord(item["mensagem"], indice);
 
                                       },
                                     ),
