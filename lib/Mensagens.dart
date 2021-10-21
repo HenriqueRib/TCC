@@ -56,7 +56,7 @@ class _MensagensState extends State<Mensagens> {
   bool bgControle = false;
   int idTocando = 0;
   var speed = 1.0;
-  String _mensagemOuvir = "Aperte play para ouvir";
+  var indiceAtual;
 
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
@@ -200,12 +200,17 @@ class _MensagensState extends State<Mensagens> {
       setState(() {
         _bg = "imagens/bg1.png";
         tocando = true;
-        _mensagemOuvir = "Aperte pause para pausar";
         idTocando = indice;
+        indiceAtual = indice;
       });
     }else{
       print("Resume Audio");
-      await audioPlayer.resume();
+      print('indiceAtual -> $indiceAtual iNDICE -> $indice');
+      if (indiceAtual == indice){
+        await audioPlayer.resume();
+      }
+
+      await audioPlayer.play(caminho,isLocal: true);
       await audioPlayer.setPlaybackRate(playbackRate: speed);
 
       if(bgControle == false){
@@ -215,7 +220,6 @@ class _MensagensState extends State<Mensagens> {
       }
       setState(() {
         tocando = true;
-        _mensagemOuvir = "Aperte pause para pausar";
         idTocando = indice;
       });
       primeiraExecucao = true;
@@ -259,9 +263,9 @@ class _MensagensState extends State<Mensagens> {
          speed = 1.0;
          tocando = false;
          pause = false;
-         _mensagemOuvir = "Aperte play para ouvir";
          bgControle = false;
         _bg = "imagens/bg.png";
+         primeiraExecucao = true;
       });
     });
 
@@ -897,14 +901,24 @@ class _MensagensState extends State<Mensagens> {
                                       },
                                     ),
                                   ),
+                                  tocando && idTocando == indice ?
                                   Container(
                                     constraints: BoxConstraints(maxWidth: 140),
                                     child: Padding(
                                       padding: EdgeInsets.only(left: 8),
-                                      child: Text(_mensagemOuvir ,
+                                      child: Text("Aperte pause para pausar" ,
                                           maxLines: 2),
                                     ),
-                                  ),
+                                  )
+                                  :
+                                  Container(
+                                    constraints: BoxConstraints(maxWidth: 140),
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 8),
+                                      child: Text("Aperte play para ouvir" ,
+                                          maxLines: 2),
+                                    ),
+                                  )
                                 ],
                               ),
 //                              Text(item["mensagem"],style: TextStyle(fontSize: 18),),
