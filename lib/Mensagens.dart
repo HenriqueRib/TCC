@@ -55,6 +55,8 @@ class _MensagensState extends State<Mensagens> {
   bool pause = false;
   bool bgControle = false;
   int idTocando = 0;
+  var speed = 1.0;
+  String _mensagemOuvir = "Aperte play para ouvir";
 
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
@@ -189,7 +191,7 @@ class _MensagensState extends State<Mensagens> {
 
     if( primeiraExecucao == true && pause == false ){
 //      audioPlayer = (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
-      var speed = 4.0;
+
       await audioPlayer.play(caminho,isLocal: true);
       await audioPlayer.setPlaybackRate(playbackRate: speed);
 
@@ -198,12 +200,13 @@ class _MensagensState extends State<Mensagens> {
       setState(() {
         _bg = "imagens/bg1.png";
         tocando = true;
+        _mensagemOuvir = "Aperte pause para pausar";
         idTocando = indice;
       });
     }else{
       print("Resume Audio");
       await audioPlayer.resume();
-      await audioPlayer.setPlaybackRate(playbackRate: 4.0);
+      await audioPlayer.setPlaybackRate(playbackRate: speed);
 
       if(bgControle == false){
         setState(() {
@@ -212,6 +215,7 @@ class _MensagensState extends State<Mensagens> {
       }
       setState(() {
         tocando = true;
+        _mensagemOuvir = "Aperte pause para pausar";
         idTocando = indice;
       });
       primeiraExecucao = true;
@@ -252,8 +256,10 @@ class _MensagensState extends State<Mensagens> {
       setState(() {
          possition = 0;
          duracao_total = 0;
+         speed = 1.0;
          tocando = false;
          pause = false;
+         _mensagemOuvir = "Aperte play para ouvir";
          bgControle = false;
         _bg = "imagens/bg.png";
       });
@@ -263,6 +269,7 @@ class _MensagensState extends State<Mensagens> {
   }
 
   _stopAudio() async{
+    //TODO não é stop é pause
 //    if (pause == false){
       print("Pause Audio");
       await audioPlayer.pause();
@@ -272,16 +279,6 @@ class _MensagensState extends State<Mensagens> {
         pause = true;
         idTocando = 0;
       });
-//    }
-//Ainda não criei botao para fazer o stop
-//    if (primeiraExecucao == true) {
-//      print("Stop Audio");
-//      await audioPlayer.stop();
-//      setState(() {
-//        _bg = "imagens/bg.png";
-//        tocando = false;
-//      });
-//    }
   }
 
   _verifica(){
@@ -451,7 +448,7 @@ class _MensagensState extends State<Mensagens> {
         builder:(context){
           return
             Padding(
-              padding: EdgeInsets.fromLTRB(0,400,0,0),
+              padding: EdgeInsets.fromLTRB(0,200,0,0),
               child: AlertDialog(
                 title: Text("Grave e envie seu audio!"),
                 content: Column(
@@ -461,21 +458,18 @@ class _MensagensState extends State<Mensagens> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
 
-                        Padding(
-                          padding: EdgeInsets.all(12),
-                          child: GestureDetector(
-                            child: Icon(Icons.mic),
-                            onTap: (){
 
-                            },
-                          ),
-                        ),
                         Padding(
                           padding: EdgeInsets.all(12),
                           child: GestureDetector(
                             child: Icon(Icons.stop),
                             onTap: (){
 
+                              setState(() {
+                                _bg = "imagens/bg.png";
+                                speed = 1.0;
+                                 audioPlayer.setPlaybackRate(playbackRate: speed);
+                              });
                             },
                           ),
                         ),
@@ -484,7 +478,8 @@ class _MensagensState extends State<Mensagens> {
                           child: GestureDetector(
                             child: Icon(Icons.play_arrow),
                             onTap: (){
-                             // _mudabg();
+                              speed = 5.0;
+                               audioPlayer.setPlaybackRate(playbackRate: speed);
                             },
                           ),
                         )
@@ -781,6 +776,99 @@ class _MensagensState extends State<Mensagens> {
                                   ? Image.network(item["urlImagem"])
                                   : Row(
                                 children: <Widget>[
+                                  tocando && idTocando == indice ?
+                                      speed == 1.0 ?
+                                  CircleAvatar(
+                                      maxRadius: 30,
+                                      backgroundColor: Color(0xff2A5E8e),
+                                      child: GestureDetector(
+                                        onTap: (){
+                                          setState(() {
+                                              speed = 2.0;
+                                              audioPlayer.setPlaybackRate(playbackRate: speed );
+                                            });
+                                          },
+                                        child: Container(
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          child: Center(
+                                            child: Text("1x",
+                                                style: TextStyle(
+                                                fontSize: 35,
+                                                fontStyle: FontStyle.normal,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 0,
+                                                wordSpacing: 0,
+                                                decoration: TextDecoration.none,
+                                                color: Colors.white
+                                              ),
+                                            )
+                                          )
+                                        ),
+                                      )
+                                  )
+                                      :
+                                  speed == 2.0 ?
+                                      CircleAvatar(
+                                          maxRadius: 30,
+                                          backgroundColor: Color(0xff2A5E8e),
+                                          child: GestureDetector(
+                                            onTap: (){
+                                              setState(() {
+                                                speed = 5.0;
+                                                audioPlayer.setPlaybackRate(playbackRate: speed );
+                                              });
+                                            },
+                                            child: Container(
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                                child: Center(
+                                                    child: Text("2x",
+                                                    style: TextStyle(
+                                                        fontSize: 35,
+                                                        fontStyle: FontStyle.normal,
+                                                        fontWeight: FontWeight.bold,
+                                                        letterSpacing: 0,
+                                                        wordSpacing: 0,
+                                                        decoration: TextDecoration.none,
+                                                        color: Colors.white
+                                                    ),
+                                                  )
+                                                )
+                                            ),
+                                          )
+                                      )
+                                   :
+                                  CircleAvatar(
+                                      maxRadius: 30,
+                                      backgroundColor: Color(0xff2A5E8e),
+                                      child: GestureDetector(
+                                        onTap: (){
+                                          setState(() {
+                                            speed = 1.0;
+                                            audioPlayer.setPlaybackRate(playbackRate: speed );
+                                          });
+                                        },
+                                        child: Container(
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            child: Center(
+                                                child: Text("5x",
+                                                style: TextStyle(
+                                                    fontSize: 35,
+                                                    fontStyle: FontStyle.normal,
+                                                    fontWeight: FontWeight.bold,
+                                                    letterSpacing: 0,
+                                                    wordSpacing: 0,
+                                                    decoration: TextDecoration.none,
+                                                    color: Colors.white
+                                                ),
+                                              )
+                                            )
+                                        ),
+                                      )
+                                  )
+                                      :
                                   CircleAvatar(
                                       maxRadius: 30,
                                       backgroundColor: Colors.grey,
@@ -802,19 +890,20 @@ class _MensagensState extends State<Mensagens> {
                                     child: IconButton(
                                       icon: Icon(Icons.play_arrow, size: 40,),
                                       onPressed: () {
-
                                         setState(() {
                                           caminho = item["urlImagem"];
                                         });
-//                                        _mudabg(item["mensagem"]);
                                         _playRecord(item["mensagem"], indice);
-
                                       },
                                     ),
                                   ),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 8),
-                                    child: Text(widget.contato.nome),
+                                  Container(
+                                    constraints: BoxConstraints(maxWidth: 140),
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 8),
+                                      child: Text(_mensagemOuvir ,
+                                          maxLines: 2),
+                                    ),
                                   ),
                                 ],
                               ),
