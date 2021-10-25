@@ -33,12 +33,12 @@ Após é só soltar que automaticamente se enviara uma mensagem do tipo de áudi
 2- Ao se ultrapassar 50% do tempo do áudio que se está ouvindo a tela amarela será disparada, o que significa que ainda existe menos do que 50% do áudio para se ouvir.
 Conforme gravura a baixo.
     
- ![alt text]( /assets/imagens/manual/tela_verde.jpeg)
+ ![alt text]( /assets/imagens/manual/tela_amarela.jpeg)
  
 3- Ao se ultrapassar 75% do tempo do áudio que se está ouvindo a tela vermelha será disparada, o que significa que ainda existe menos do que 25% do áudio para se ouvir.
 Conforme gravura a baixo. 
 
- ![alt text]( /assets/imagens/manual/tela_verde.jpeg)
+ ![alt text]( /assets/imagens/manual/tela_vermelha.jpeg)
  
 
  ## Aumentar a velocidade do áudio
