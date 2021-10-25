@@ -641,8 +641,8 @@ class _MensagensState extends State<Mensagens> {
                   suffixIcon:
                   _subindoImagem
                       ? CircularProgressIndicator()
-//                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
-                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _caixaDialogo),
+                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
+//                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _caixaDialogo),
                 ),
               ),
             ),
