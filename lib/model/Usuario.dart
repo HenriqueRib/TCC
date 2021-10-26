@@ -20,7 +20,6 @@ class Usuario {
 
   }
 
-
   String get idUsuario => _idUsuario;
 
   set idUsuario(String value) {
@@ -50,6 +49,5 @@ class Usuario {
   set nome(String value) {
     _nome = value;
   }
-
 
 }

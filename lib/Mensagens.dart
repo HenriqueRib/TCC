@@ -10,7 +10,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sound_lite/public/flutter_sound_recorder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:audio_recorder/audio_recorder.dart';
@@ -27,46 +26,40 @@ class Mensagens extends StatefulWidget {
 
 class _MensagensState extends State<Mensagens> {
 
+  bool primeiraExecucao = true;
   bool _subindoImagem = false;
+  bool _recording = false;
+  bool _btnEnviar = false;
+  bool _subindoAudio = false;
+  bool tocando = false;
+  bool pause = false;
+  bool bgControle = false;
+  String _tempoupload;
   String _idUsuarioLogado;
   String _fotoUsuarioLogado;
   String _fotoAudio;
   String _idUsuarioDestinatario;
-  Firestore db = Firestore.instance;
-  TextEditingController _controllerMensagem = TextEditingController();
-//Após implementação de gravar
-  FocusNode focus = new FocusNode();
   String caminho = "";
-  FlutterSoundRecorder myPlayer = FlutterSoundRecorder();
-  FlutterSoundRecorder myRecorder = FlutterSoundRecorder();
-  AudioCache audioCache = AudioCache(prefix: "audios/");
-  AudioPlayer audioPlayer = AudioPlayer();
-  bool primeiraExecucao = true;
-  bool _recording = false;
-  bool _btnEnviar = false;
-  String _tempoupload;
-  bool _subindoAudio = false;
-  // Implementação cores
   String _bg = "imagens/bg.png";
-  //Importante adicionar na documentação depois
   int possition = 0;
-  var duracao_total ;
-  bool tocando = false;
-  bool pause = false;
-  bool bgControle = false;
   int idTocando = 0;
   var speed = 1.0;
+  var duracao_total ;
   var indiceAtual;
-
+  TextEditingController _controllerMensagem = TextEditingController();
+  AudioCache audioCache = AudioCache(prefix: "audios/");
+  AudioPlayer audioPlayer = AudioPlayer();
+  FocusNode focus = new FocusNode();
+  Firestore db = Firestore.instance;
 
   final _controller = StreamController<QuerySnapshot>.broadcast();
   ScrollController _scrollController = ScrollController();
 
   @override
-  void dispose() {
-    if (myRecorder != null) {
-      myRecorder.closeAudioSession();
-      myPlayer = null;
+  void dispose() async {
+    if (tocando == true) {
+      await audioPlayer.stop();
+      tocando = false;
     }
     super.dispose();
   }
@@ -167,6 +160,7 @@ class _MensagensState extends State<Mensagens> {
       setState(() {});
     }
   }
+
   _stopRecord() async {
     try {
       _recording = false;
@@ -226,18 +220,13 @@ class _MensagensState extends State<Mensagens> {
     }
 
     duracao_total = parseDuration(time) ;
-    print('Time -> $time');
-    print('Duracao -> $duracao_total');
 
     audioPlayer.onAudioPositionChanged.listen((Duration  p)  {
       possition = p.inSeconds;
       print('Possition -> $possition Current position: $p');
-      print('Possition -> $possition ');
 
         if(possition > (duracao_total.inSeconds * 0.5).floor())
         {
-          print('Entrou no bg2 -> * 0.5 possition -> $possition');
-          print('Time --> $time');
           setState(() {
             bgControle = true;
             _bg = "imagens/bg2.png";
@@ -246,8 +235,6 @@ class _MensagensState extends State<Mensagens> {
 
         if(possition > (duracao_total.inSeconds * 0.75).floor() )
         {
-          print('Entrou no bg2 -> * 0.75 possition ->  $possition');
-          print('Time --> $time');
           setState(() {
             _bg = "imagens/bg3.png";
           });
@@ -264,18 +251,14 @@ class _MensagensState extends State<Mensagens> {
          tocando = false;
          pause = false;
          bgControle = false;
-        _bg = "imagens/bg.png";
+         _bg = "imagens/bg.png";
          primeiraExecucao = true;
       });
     });
 
-
   }
 
   _stopAudio() async{
-    //TODO não é stop é pause
-//    if (pause == false){
-      print("Pause Audio");
       await audioPlayer.pause();
       setState(() {
         _bg = "imagens/bg.png";
@@ -330,79 +313,6 @@ class _MensagensState extends State<Mensagens> {
 
   }
 
-  //Gravar , Debug. Apagar depois
-  _gravar() async {
-
-    await Permission.microphone.request().isGranted;
-//    print(await Permission.microphone.request().isGranted);
-    if (await AudioRecorder.hasPermissions) {
-      print("GRAVANDO Algo de errado não esta certo");
-    }
-
-    try {
-      _recording = true;
-      setState(() {});
-      final directory = await getApplicationDocumentsDirectory();
-      var filename =
-          'aud_' + DateTime.now().millisecondsSinceEpoch.toString() + '';
-      String path = directory.path + '/' + filename;
-
-      // Check permissions before starting
-      bool hasPermissions = await AudioRecorder.hasPermissions;
-
-      // Get the state of the recorder
-      bool isRecording = await AudioRecorder.isRecording;
-
-      // Start recording
-      print(directory.path);
-
-      await AudioRecorder.start(
-          path: path, audioOutputFormat: AudioOutputFormat.AAC);
-      print("GRAVANDO");
-
-    } catch (e) {
-      print("GRAVANDO deu Erro");
-      print(e.message);
-      _recording = false;
-      setState(() {});
-    }
-
-  }
-  _pausar() async {
-
-    try {
-      _recording = false;
-      setState(() {});
-      // Stop recording
-      Recording recording = await AudioRecorder.stop();
-      print(
-          "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
-      var audio = File(recording.path);
-//        uploadFile('audio', audio);
-      print("Gravando STOP");
-      setState(() {
-        caminho = recording.path;
-      });
-    } catch (err) {
-      print('stopRecorder error: $err');
-    }
-//    }
-
-  }
-  _parar() async {
-
-    if( primeiraExecucao ){
-      print("Play antes");
-      audioPlayer =  (await audioPlayer.play(caminho, isLocal: true)) as AudioPlayer;
-//          audioPlayer = (await audioPlayer.play(caminho)) as AudioPlayer;
-      primeiraExecucao = false;
-
-    }else{
-      audioPlayer.resume();
-    }
-
-  }
-
   Duration parseDuration(String s) {
     int hours = 0;
     int minutes = 0;
@@ -416,86 +326,6 @@ class _MensagensState extends State<Mensagens> {
     }
     micros = (double.parse(parts[parts.length - 1]) * 1000000).round();
     return Duration(hours: hours, minutes: minutes, microseconds: micros);
-  }
-
-  _mudabg(tempoDelay){
-    print(tempoDelay);
-
-    var duracao = parseDuration(tempoDelay);
-    print("teste");
-    print(duracao.inSeconds);
-
-    setState(() {
-      _bg = "imagens/bg1.png";
-    });
-
-    new Timer( Duration(seconds: duracao.inSeconds~/ 4 ), ()=>
-        setState(() {
-          _bg = "imagens/bg2.png";
-        }));
-    new Timer( Duration(seconds: duracao.inSeconds~/ 2), ()=>
-        setState(() {
-          _bg = "imagens/bg3.png";
-        }));
-    new Timer( Duration(seconds: duracao.inSeconds.toInt()), ()=>
-        setState(() {
-          _bg = "imagens/bg.png";
-        }));
-
-  }
-
-  // Função de Debug. Apagar depois
-  _caixaDialogo() async {
-
-    showDialog (
-        context: context,
-        builder:(context){
-          return
-            Padding(
-              padding: EdgeInsets.fromLTRB(0,200,0,0),
-              child: AlertDialog(
-                title: Text("Grave e envie seu audio!"),
-                content: Column(
-                  children: <Widget>[
-                    //Slider
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-
-
-                        Padding(
-                          padding: EdgeInsets.all(12),
-                          child: GestureDetector(
-                            child: Icon(Icons.stop),
-                            onTap: (){
-
-                              setState(() {
-                                _bg = "imagens/bg.png";
-                                speed = 1.0;
-                                 audioPlayer.setPlaybackRate(playbackRate: speed);
-                              });
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(12),
-                          child: GestureDetector(
-                            child: Icon(Icons.play_arrow),
-                            onTap: (){
-                              speed = 5.0;
-                               audioPlayer.setPlaybackRate(playbackRate: speed);
-                            },
-                          ),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            );
-
-        }
-    );
   }
 
   _enviarFoto() async {

@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:funcionalidade/telas/AbaContatos.dart';
 import 'package:funcionalidade/telas/AbaConversas.dart';
 import 'dart:io';
-import 'Login.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -64,7 +63,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         break;
 
     }
-    //print("Item escolhido: " + itemEscolhido );
 
   }
 

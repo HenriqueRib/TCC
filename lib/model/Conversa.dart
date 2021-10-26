@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Conversa {
 
   String _idRemetente;
@@ -8,21 +9,10 @@ class Conversa {
   String _caminhoFoto;
   String _tipoMensagem;//texto ou imagem
 
-
   Conversa();
 
   salvar() async {
-    /*
 
-    + conversas
-      + jamilton
-          + ultima_conversa
-            + jose
-              idRe
-              idDes
-              ...
-
-    */
     Firestore db = Firestore.instance;
     await db.collection("conversas")
             .document( this.idRemetente )
@@ -46,7 +36,6 @@ class Conversa {
     return map;
 
   }
-
 
   String get idRemetente => _idRemetente;
 
@@ -83,6 +72,5 @@ class Conversa {
   set tipoMensagem(String value) {
     _tipoMensagem = value;
   }
-
 
 }

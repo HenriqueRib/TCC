@@ -23,7 +23,6 @@ class Mensagem {
     };
 
     return map;
-
   }
 
   String get data => _data;
@@ -55,6 +54,5 @@ class Mensagem {
   set idUsuario(String value) {
     _idUsuario = value;
   }
-
 
 }

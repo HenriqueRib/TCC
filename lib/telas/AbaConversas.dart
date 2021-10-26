@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:funcionalidade/model/Conversa.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:funcionalidade/model/Usuario.dart';
@@ -16,6 +15,7 @@ class _AbaConversasState extends State<AbaConversas> {
   Firestore db = Firestore.instance;
   String _idUsuarioLogado;
   int _itemCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +57,7 @@ class _AbaConversasState extends State<AbaConversas> {
 
     return StreamBuilder<QuerySnapshot>(
       stream: _controller.stream,
+      // ignore: missing_return
       builder: (context, snapshot){
         switch (snapshot.connectionState) {
           case ConnectionState.none:

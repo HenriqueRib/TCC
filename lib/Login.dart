@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Cadastro.dart';
-import 'Home.dart';
-import 'RouteGenerator.dart';
 import 'model/Usuario.dart';
 
 class Login extends StatefulWidget {
@@ -35,7 +33,6 @@ class _LoginState extends State<Login> {
         usuario.senha = senha;
 
         _logarUsuario( usuario );
-
 
       }else{
         setState(() {
@@ -177,10 +174,10 @@ class _LoginState extends State<Login> {
                     ),
                     onTap: (){
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Cadastro()
-                          )
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Cadastro()
+                        )
                       );
                     },
                   ),
